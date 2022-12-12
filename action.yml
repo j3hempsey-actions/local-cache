@@ -1,6 +1,6 @@
-name: 'Cache'
-description: 'Cache artifacts like dependencies and build outputs to improve workflow execution time'
-author: 'GitHub'
+name: 'Local cache'
+description: 'Cache artifacts like dependencies and build outputs to improve workflow execution time on a local path'
+author: 'j3hempsey-actions'
 inputs:
   path:
     description: 'A list of files, directories, and wildcard patterns to cache and restore'

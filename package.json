@@ -1,11 +1,11 @@
 {
-  "name": "cache",
-  "version": "3.0.11",
+  "name": "local-cache",
+  "version": "1.0.0",
   "private": true,
   "description": "Cache dependencies and build outputs",
   "main": "dist/restore/index.js",
   "scripts": {
-    "build": "tsc && ncc build -o dist/restore src/restore.ts && ncc build -o dist/save src/save.ts",
+    "build": "tsc && ncc build -o dist/restore src/restore.ts && ncc build -o dist/save src/save.ts && ncc build -o dist/clean src/clean.ts",
     "test": "tsc --noEmit && jest --coverage",
     "lint": "eslint **/*.ts --cache",
     "format": "prettier --write **/*.ts",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/cache.git"
+    "url": "git+https://github.com/j3hempsey-actions/local-cache.git"
   },
   "keywords": [
     "actions",
