@@ -68,3 +68,13 @@ jobs:
     - name: Verify cache files outside working directory
       shell: bash
       run: __tests__/verify-cache-files.sh ${{ runner.os }} ~/test-cache
+
+  test-cleanup:
+    needs: test-restore
+    runs-on: [self-hosted, linux, X64]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Cleanup old caches
+      shell: bash
+      run: bash -x cleanup.sh
