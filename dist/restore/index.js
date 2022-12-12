@@ -53262,7 +53262,7 @@ function restoreCache(paths, primaryKey, restoreKeys) {
         // Restore files from archive
         const cachePath = (0, path_1.join)(cacheDir, cacheFile.path);
         const baseDir = (0, path_1.dirname)(path);
-        const cmd = `lz4 -d -v -c ${cachePath} | tar xf - -C ${baseDir}`;
+        const cmd = `lz4 -d -v -c ${cachePath} 2>/dev/null | tar xf - -C ${baseDir}`;
         core.info([
             `Restoring cache: ${cacheFile.name}`,
             `Created: ${(_a = cacheFile.stats) === null || _a === void 0 ? void 0 : _a.mtime}`,
@@ -53295,7 +53295,7 @@ function saveCache(paths, key) {
         // Ensure cache dir exists
         const mkdirPromise = execAsync(`mkdir -p ${cacheDir}`);
         yield streamOutputUntilResolved(mkdirPromise);
-        const cmd = `tar cf - -C ${baseDir} ${folderName} | lz4 -v > ${cachePath}`;
+        const cmd = `tar cf - -C ${baseDir} ${folderName} | lz4 -v > ${cachePath} 2>/dev/null`;
         core.info(`Save cache: ${cacheName}`);
         // console.log({ cacheDir, cacheName, cachePath, cmd });
         const createCacheDirPromise = execAsync(cmd);
