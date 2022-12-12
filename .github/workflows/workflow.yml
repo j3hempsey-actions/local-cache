@@ -13,11 +13,7 @@ on:
 jobs:
   # Build and unit test
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: [self-hosted, linux, X64]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -36,11 +32,7 @@ jobs:
 
   # End to end save and restore
   test-save:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: [self-hosted, linux, X64]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -59,11 +51,7 @@ jobs:
           ~/test-cache
   test-restore:
     needs: test-save
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: [self-hosted, linux, X64]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -80,50 +68,3 @@ jobs:
     - name: Verify cache files outside working directory
       shell: bash
       run: __tests__/verify-cache-files.sh ${{ runner.os }} ~/test-cache
-
-  # End to end with proxy
-  test-proxy-save:
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:latest
-      options: --dns 127.0.0.1
-    services:
-      squid-proxy:
-        image: ubuntu/squid:latest
-        ports:
-          - 3128:3128
-    env:
-      https_proxy: http://squid-proxy:3128
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Generate files
-      run: __tests__/create-cache-files.sh proxy test-cache
-    - name: Save cache
-      uses: ./
-      with:
-        key: test-proxy-${{ github.run_id }}
-        path: test-cache
-  test-proxy-restore:
-    needs: test-proxy-save
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:latest
-      options: --dns 127.0.0.1
-    services:
-      squid-proxy:
-        image: ubuntu/squid:latest
-        ports:
-          - 3128:3128
-    env:
-      https_proxy: http://squid-proxy:3128
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Restore cache
-      uses: ./
-      with:
-        key: test-proxy-${{ github.run_id }}
-        path: test-cache
-    - name: Verify cache
-      run: __tests__/verify-cache-files.sh proxy test-cache

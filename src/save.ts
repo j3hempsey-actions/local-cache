@@ -1,6 +1,6 @@
-import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 
+import * as cache from "./cache";
 import { Events, Inputs, State } from "./constants";
 import * as utils from "./utils/actionUtils";
 
@@ -33,6 +33,12 @@ async function run(): Promise<void> {
             return;
         }
 
+        const skipSave = core.getInput("skip-save") || false;
+        if (skipSave) {
+            core.info(`Cache save skipped`);
+            return;
+        }
+
         if (utils.isExactKeyMatch(primaryKey, state)) {
             core.info(
                 `Cache hit occurred on the primary key ${primaryKey}, not saving cache.`
@@ -44,9 +50,7 @@ async function run(): Promise<void> {
             required: true
         });
 
-        const cacheId = await cache.saveCache(cachePaths, primaryKey, {
-            uploadChunkSize: utils.getInputAsInt(Inputs.UploadChunkSize)
-        });
+        const cacheId = await cache.saveCache(cachePaths, primaryKey);
 
         if (cacheId != -1) {
             core.info(`Cache saved with key: ${primaryKey}`);

@@ -1,6 +1,6 @@
-import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 
+import * as cache from "./cache";
 import { Events, Inputs, State } from "./constants";
 import * as utils from "./utils/actionUtils";
 
@@ -24,11 +24,16 @@ async function run(): Promise<void> {
         const primaryKey = core.getInput(Inputs.Key, { required: true });
         core.saveState(State.CachePrimaryKey, primaryKey);
 
+        const skipRestore = core.getInput("skip-restore") || false;
         const restoreKeys = utils.getInputAsArray(Inputs.RestoreKeys);
         const cachePaths = utils.getInputAsArray(Inputs.Path, {
             required: true
         });
 
+        if (skipRestore) {
+            core.info(`Cache restore skipped`);
+            return;
+        }
         const cacheKey = await cache.restoreCache(
             cachePaths,
             primaryKey,

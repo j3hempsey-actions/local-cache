@@ -1,6 +1,6 @@
-import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 
+import * as cache from "../src/cache";
 import { Events, Inputs, RefKey } from "../src/constants";
 import run from "../src/restore";
 import * as actionUtils from "../src/utils/actionUtils";
