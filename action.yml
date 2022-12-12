@@ -11,9 +11,11 @@ inputs:
   restore-keys:
     description: 'An ordered list of keys to use for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.'
     required: false
-  upload-chunk-size:
-    description: 'The chunk size used to split up large files during upload, in bytes'
+  skip-save:
+    description: 'Skip saving of the cache. Useful if you only want to restore the files of another build / job.'
     required: false
+  skip-restore:
+    description: 'Skip restoring of the cache. Useful if you want to create the cache, but never rely on any old/existing files.'
 outputs:
   cache-hit:
     description: 'A boolean value to indicate an exact match was found for the primary key'

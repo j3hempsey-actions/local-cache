@@ -26,5 +26,4 @@ export function clearInputs(): void {
     delete process.env[getInputName(Inputs.Path)];
     delete process.env[getInputName(Inputs.Key)];
     delete process.env[getInputName(Inputs.RestoreKeys)];
-    delete process.env[getInputName(Inputs.UploadChunkSize)];
 }
