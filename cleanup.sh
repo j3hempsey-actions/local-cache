@@ -11,7 +11,7 @@ for _ in $(seq 0 $maxfiles); do
     partition=$(echo "$output" | awk '{ print $2 }' )
     if (( usep >= act )); then
         echo "Running out of space \"$partition ($usep%)\" on $(hostname) as on $(date)"
-        oldfile=$(find "$CACHE_DIR" -type f  -printf "%T@ %Tc %p\n" | sort -n | head -n 1 | awk '{ print $9 }')
+        oldfile=$(find "$CACHE_DIR" -type f -name "*.tar.gz" -printf "%T@ %Tc %p\n" | sort -n | head -n 2 | awk '{ print $9 }')
         echo "Deleting \"$oldfile\" ..."
         rm -f "$oldfile"
     else

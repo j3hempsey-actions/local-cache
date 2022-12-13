@@ -9,7 +9,7 @@ This action allows local caching of dependencies and build outputs to improve wo
 ### Pre-requisites
 Create a workflow `.yml` file in your repositories `.github/workflows` directory. An [example workflow](#example-workflow) is available below. For more information, reference the GitHub Help Documentation for [Creating a workflow file](https://help.github.com/en/articles/configuring-a-workflow#creating-a-workflow-file).
 
-The utilities `tar` and `lz4` needs to be included and accessible in the
+The utilities `tar` and `pigz` needs to be included and accessible in the
 execution path of your self-hosted runner.
 
 ### Inputs

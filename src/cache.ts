@@ -173,7 +173,7 @@ export async function restoreCache(
     // Restore files from archive
     const cachePath = join(cacheDir, cacheFile.path);
     const baseDir = dirname(path);
-    const cmd = `lz4 -d -v -c ${cachePath} 2>/dev/null | tar xf - -C ${baseDir}`;
+    const cmd = `tar -I pigz -xf ${cachePath} -C ${baseDir}`;
 
     core.info(
         [
@@ -205,7 +205,7 @@ export async function saveCache(paths: string[], key: string): Promise<number> {
     const path = paths[0];
 
     const cacheDir = getCacheDirPath();
-    const cacheName = `${filenamify(key)}.tar.lz4`;
+    const cacheName = `${filenamify(key)}.tar.gz`;
     const cachePath = join(cacheDir, cacheName);
     const baseDir = dirname(path);
     const folderName = basename(path);
@@ -214,7 +214,7 @@ export async function saveCache(paths: string[], key: string): Promise<number> {
     const mkdirPromise = execAsync(`mkdir -p ${cacheDir}`);
     await streamOutputUntilResolved(mkdirPromise);
 
-    const cmd = `tar cf - -C ${baseDir} ${folderName} | lz4 -v > ${cachePath} 2>/dev/null`;
+    const cmd = `tar -I pigz -cf ${cachePath} -C ${baseDir} ${folderName}`;
 
     core.info(`Save cache: ${cacheName}`);
     // console.log({ cacheDir, cacheName, cachePath, cmd });
