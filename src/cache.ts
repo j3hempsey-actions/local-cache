@@ -185,7 +185,14 @@ export async function restoreCache(
 
     const createCacheDirPromise = execAsync(cmd);
 
-    await streamOutputUntilResolved(createCacheDirPromise);
+    try {
+        await streamOutputUntilResolved(createCacheDirPromise);
+    } catch (err) {
+        const skipFailure = core.getInput("skip-failure") || false;
+        if (!skipFailure) {
+            throw err;
+        }
+    }
 
     return key;
 }
@@ -221,7 +228,14 @@ export async function saveCache(paths: string[], key: string): Promise<number> {
 
     const createCacheDirPromise = execAsync(cmd);
 
-    await streamOutputUntilResolved(createCacheDirPromise);
+    try {
+        await streamOutputUntilResolved(createCacheDirPromise);
+    } catch (err) {
+        const skipFailure = core.getInput("skip-failure") || false;
+        if (!skipFailure) {
+            throw err;
+        }
+    }
 
     return 420;
 }

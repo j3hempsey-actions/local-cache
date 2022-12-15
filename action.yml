@@ -16,6 +16,9 @@ inputs:
     required: false
   skip-restore:
     description: 'Skip restoring of the cache. Useful if you want to create the cache, but never rely on any old/existing files.'
+  skip-failure:
+    description: 'Allow tar failures to not fail out a build - this can be used for the event tar archives are corrupted to not fail'
+    required: false
 outputs:
   cache-hit:
     description: 'A boolean value to indicate an exact match was found for the primary key'

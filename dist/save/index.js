@@ -53358,7 +53358,15 @@ function restoreCache(paths, primaryKey, restoreKeys) {
             `Size: ${(0, pretty_bytes_1.default)(((_b = cacheFile.stats) === null || _b === void 0 ? void 0 : _b.size) || 0)}`
         ].join("\n"));
         const createCacheDirPromise = execAsync(cmd);
-        yield streamOutputUntilResolved(createCacheDirPromise);
+        try {
+            yield streamOutputUntilResolved(createCacheDirPromise);
+        }
+        catch (err) {
+            const skipFailure = core.getInput("skip-failure") || false;
+            if (!skipFailure) {
+                throw err;
+            }
+        }
         return key;
     });
 }
@@ -53388,7 +53396,15 @@ function saveCache(paths, key) {
         core.info(`Save cache: ${cacheName}`);
         // console.log({ cacheDir, cacheName, cachePath, cmd });
         const createCacheDirPromise = execAsync(cmd);
-        yield streamOutputUntilResolved(createCacheDirPromise);
+        try {
+            yield streamOutputUntilResolved(createCacheDirPromise);
+        }
+        catch (err) {
+            const skipFailure = core.getInput("skip-failure") || false;
+            if (!skipFailure) {
+                throw err;
+            }
+        }
         return 420;
     });
 }
