@@ -53363,6 +53363,7 @@ function restoreCache(paths, primaryKey, restoreKeys) {
         }
         catch (err) {
             const skipFailure = core.getInput("skip-failure") || false;
+            core.warning(`Error running tar: {err}`);
             if (!skipFailure) {
                 throw err;
             }
@@ -53400,6 +53401,7 @@ function saveCache(paths, key) {
             yield streamOutputUntilResolved(createCacheDirPromise);
         }
         catch (err) {
+            core.warning(`Error running tar: {err}`);
             const skipFailure = core.getInput("skip-failure") || false;
             if (!skipFailure) {
                 throw err;
