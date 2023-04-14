@@ -158,14 +158,15 @@ test("restore with too many keys should fail", async () => {
     await run();
     expect(restoreCacheMock).toHaveBeenCalledTimes(1);
     expect(restoreCacheMock).toHaveBeenCalledWith([path], key, restoreKeys);
-    expect(failedMock).toHaveBeenCalledWith(
-        `Key Validation Error: Keys are limited to a maximum of 10.`
-    );
+    // No limit on max restore keys
+    // expect(failedMock).toHaveBeenCalledWith(
+    //     `Key Validation Error: Keys are limited to a maximum of 10.`
+    // );
 });
 
 test("restore with large key should fail", async () => {
     const path = "node_modules";
-    const key = "foo".repeat(512); // Over the 512 character limit
+    const key = "foo".repeat(255); // Over the 255 character limit
     testUtils.setInputs({
         path: path,
         key
@@ -176,7 +177,7 @@ test("restore with large key should fail", async () => {
     expect(restoreCacheMock).toHaveBeenCalledTimes(1);
     expect(restoreCacheMock).toHaveBeenCalledWith([path], key, []);
     expect(failedMock).toHaveBeenCalledWith(
-        `Key Validation Error: ${key} cannot be larger than 512 characters.`
+        `Key Validation Error: ${key} cannot be larger than 255 characters.`
     );
 });
 

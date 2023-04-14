@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import { exec, PromiseWithChild } from "child_process";
 import fg from "fast-glob";
 import filenamify from "filenamify";
+import fs from "fs";
 import { basename, dirname, join } from "path";
 import prettyBytes from "pretty-bytes";
 import { promisify } from "util";
@@ -219,13 +220,11 @@ export async function saveCache(paths: string[], key: string): Promise<number> {
     const folderName = basename(path);
 
     // Ensure cache dir exists
-    const mkdirPromise = execAsync(`mkdir -p ${cacheDir}`);
-    await streamOutputUntilResolved(mkdirPromise);
+    await fs.promises.mkdir(cacheDir, { recursive: true });
 
     const cmd = `tar -I pigz -cf ${cachePath} -C ${baseDir} ${folderName}`;
 
     core.info(`Save cache: ${cacheName}`);
-    // console.log({ cacheDir, cacheName, cachePath, cmd });
 
     const createCacheDirPromise = execAsync(cmd);
 

@@ -11,9 +11,10 @@ process.on("uncaughtException", e => utils.logWarning(e.message));
 
 async function run(): Promise<void> {
     try {
-        if (!utils.isCacheFeatureAvailable()) {
-            return;
-        }
+        // Using local cache on a runner is always an available option
+        // if (!utils.isCacheFeatureAvailable()) {
+        //     return;
+        // }
 
         if (!utils.isValidEvent()) {
             utils.logWarning(

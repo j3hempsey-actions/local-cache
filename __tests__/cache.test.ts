@@ -14,14 +14,17 @@ const GITHUB_REPOSITORY = (process.env.GITHUB_REPOSITORY = "integration-test");
 
 describe("save and restore files", () => {
     beforeEach(async () => {
-        await fs.promises.rmdir(CACHE_DIR, { recursive: true });
-        await fs.promises.rmdir(FIXTURES_BACKUP_DIR, { recursive: true });
+        await fs.promises.rm(CACHE_DIR, { recursive: true, force: true });
+        await fs.promises.rm(FIXTURES_BACKUP_DIR, {
+            recursive: true,
+            force: true
+        });
         await execAsync(`git checkout ${resolve(FIXTURES_DIR)}`);
     });
     test("creates archive file", async () => {
         await cache.saveCache([FIXTURES_DIR], "save-test");
         await fs.promises.access(
-            resolve(CACHE_DIR, GITHUB_REPOSITORY, "save-test.tar.lz4"),
+            resolve(CACHE_DIR, GITHUB_REPOSITORY, "save-test.tar.gz"),
             fs.constants.R_OK | fs.constants.W_OK
         );
     });
@@ -33,7 +36,10 @@ describe("save and restore files", () => {
         await fs.promises.rename(FIXTURES_DIR, FIXTURES_BACKUP_DIR);
 
         // Delete fixtures dir and restore
-        await fs.promises.rmdir(FIXTURES_DIR, { recursive: true });
+        await fs.promises.rm(FIXTURES_DIR, {
+            recursive: true,
+            force: true
+        });
         await cache.restoreCache([FIXTURES_DIR], "restore-test");
 
         // Assert that backup dir and restored dir have the same content
@@ -51,8 +57,9 @@ describe("save and restore files", () => {
         await cache.saveCache([FIXTURES_DIR], "latest-archive-test-2");
 
         // Delete fixtures dir and restore
-        await fs.promises.rmdir(FIXTURES_DIR, {
-            recursive: true
+        await fs.promises.rm(FIXTURES_DIR, {
+            recursive: true,
+            force: true
         });
         await cache.restoreCache([FIXTURES_DIR], "latest-archive-test");
 
@@ -70,8 +77,11 @@ describe("save and restore files", () => {
 
         // Create backup dir and remove fixtures
         await fs.promises.rename(FIXTURES_DIR, FIXTURES_BACKUP_DIR);
-        await fs.promises.rmdir(FIXTURES_DIR, { recursive: true });
-
+        // Delete fixtures dir and restore
+        await fs.promises.rm(FIXTURES_DIR, {
+            recursive: true,
+            force: true
+        });
         // Restore with non-existing primary key, but a matching fallback key
         await cache.restoreCache([FIXTURES_DIR], "fallback-test-doesnt-exist", [
             "fallback-test"

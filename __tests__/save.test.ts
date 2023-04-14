@@ -1,6 +1,6 @@
-import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 
+import * as cache from "../src/cache";
 import { Events, Inputs, RefKey } from "../src/constants";
 import run from "../src/save";
 import * as actionUtils from "../src/utils/actionUtils";
@@ -104,29 +104,59 @@ test("save with no primary key in state outputs warning", async () => {
     expect(failedMock).toHaveBeenCalledTimes(0);
 });
 
-test("save without AC available should no-op", async () => {
+test("save without AC available should *not* no-op", async () => {
     jest.spyOn(actionUtils, "isCacheFeatureAvailable").mockImplementation(
         () => false
     );
+    const primaryKey = "Linux-node-bb828da54c148048dd17899ba9fda624811cfb43";
+    const savedCacheKey = "Linux-node-";
 
+    jest.spyOn(core, "getState")
+        // Cache Entry State
+        .mockImplementationOnce(() => {
+            return savedCacheKey;
+        })
+        // Cache Key State
+        .mockImplementationOnce(() => {
+            return primaryKey;
+        });
+
+    const inputPath = "node_modules";
+    testUtils.setInput(Inputs.Path, inputPath);
     const saveCacheMock = jest.spyOn(cache, "saveCache");
 
     await run();
 
-    expect(saveCacheMock).toHaveBeenCalledTimes(0);
+    expect(saveCacheMock).toHaveBeenCalledTimes(1);
 });
 
-test("save on ghes without AC available should no-op", async () => {
+test("save on ghes without AC available should *not* no-op", async () => {
     jest.spyOn(actionUtils, "isGhes").mockImplementation(() => true);
     jest.spyOn(actionUtils, "isCacheFeatureAvailable").mockImplementation(
         () => false
     );
 
+    const primaryKey = "Linux-node-bb828da54c148048dd17899ba9fda624811cfb43";
+    const savedCacheKey = "Linux-node-";
+
+    jest.spyOn(core, "getState")
+        // Cache Entry State
+        .mockImplementationOnce(() => {
+            return savedCacheKey;
+        })
+        // Cache Key State
+        .mockImplementationOnce(() => {
+            return primaryKey;
+        });
+
+    const inputPath = "node_modules";
+    testUtils.setInput(Inputs.Path, inputPath);
+
     const saveCacheMock = jest.spyOn(cache, "saveCache");
 
     await run();
 
-    expect(saveCacheMock).toHaveBeenCalledTimes(0);
+    expect(saveCacheMock).toHaveBeenCalledTimes(1);
 });
 
 test("save on GHES with AC available", async () => {

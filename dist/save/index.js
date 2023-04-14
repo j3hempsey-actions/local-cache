@@ -36,8 +36,6 @@ module.exports =
 /******/ 		// Load entry module and return exports
 /******/ 		return __webpack_require__(681);
 /******/ 	};
-/******/ 	// initialize runtime
-/******/ 	runtime(__webpack_require__);
 /******/
 /******/ 	// run startup
 /******/ 	return startup();
@@ -1927,7 +1925,24 @@ module.exports = ["ac","com.ac","edu.ac","gov.ac","net.ac","mil.ac","org.ac","ad
 
 
 /***/ }),
-/* 66 */,
+/* 66 */
+/***/ (function(module) {
+
+"use strict";
+
+
+var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
+
+module.exports = function (str) {
+	if (typeof str !== 'string') {
+		throw new TypeError('Expected a string');
+	}
+
+	return str.replace(matchOperatorsRe, '\\$&');
+};
+
+
+/***/ }),
 /* 67 */,
 /* 68 */,
 /* 69 */,
@@ -2863,7 +2878,21 @@ exports.toCommandProperties = toCommandProperties;
 //# sourceMappingURL=utils.js.map
 
 /***/ }),
-/* 83 */,
+/* 83 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const filenamify = __webpack_require__(356);
+const filenamifyPath = __webpack_require__(244);
+
+const filenamifyCombined = filenamify;
+filenamifyCombined.path = filenamifyPath;
+
+module.exports = filenamify;
+
+
+/***/ }),
 /* 84 */,
 /* 85 */,
 /* 86 */
@@ -4956,13 +4985,7 @@ exports.isEnoentCodeError = isEnoentCodeError;
 
 /***/ }),
 /* 116 */,
-/* 117 */
-/***/ (function() {
-
-eval("require")("node:path");
-
-
-/***/ }),
+/* 117 */,
 /* 118 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -7846,7 +7869,23 @@ function _default(name, version, hashfunc) {
 /***/ }),
 /* 242 */,
 /* 243 */,
-/* 244 */,
+/* 244 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const path = __webpack_require__(622);
+const filenamify = __webpack_require__(356);
+
+const filenamifyPath = (filePath, options) => {
+	filePath = path.resolve(filePath);
+	return path.join(path.dirname(filePath), filenamify(path.basename(filePath), options));
+};
+
+module.exports = filenamifyPath;
+
+
+/***/ }),
 /* 245 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -12524,7 +12563,53 @@ exports.pathMatch = pathMatch;
 /* 353 */,
 /* 354 */,
 /* 355 */,
-/* 356 */,
+/* 356 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const trimRepeated = __webpack_require__(567);
+const filenameReservedRegex = __webpack_require__(909);
+const stripOuter = __webpack_require__(448);
+
+// Doesn't make sense to have longer filenames
+const MAX_FILENAME_LENGTH = 100;
+
+const reControlChars = /[\u0000-\u001f\u0080-\u009f]/g; // eslint-disable-line no-control-regex
+const reRelativePath = /^\.+/;
+const reTrailingPeriods = /\.+$/;
+
+const filenamify = (string, options = {}) => {
+	if (typeof string !== 'string') {
+		throw new TypeError('Expected a string');
+	}
+
+	const replacement = options.replacement === undefined ? '!' : options.replacement;
+
+	if (filenameReservedRegex().test(replacement) && reControlChars.test(replacement)) {
+		throw new Error('Replacement string cannot contain reserved filename characters');
+	}
+
+	string = string.replace(filenameReservedRegex(), replacement);
+	string = string.replace(reControlChars, replacement);
+	string = string.replace(reRelativePath, replacement);
+	string = string.replace(reTrailingPeriods, '');
+
+	if (replacement.length > 0) {
+		string = trimRepeated(string, replacement);
+		string = string.length > 1 ? stripOuter(string, replacement) : string;
+	}
+
+	string = filenameReservedRegex.windowsNames().test(string) ? string + replacement : string;
+	string = string.slice(0, typeof options.maxLength === 'number' ? options.maxLength : MAX_FILENAME_LENGTH);
+
+	return string;
+};
+
+module.exports = filenamify;
+
+
+/***/ }),
 /* 357 */
 /***/ (function(module) {
 
@@ -42258,7 +42343,24 @@ exports.string = string;
 /* 445 */,
 /* 446 */,
 /* 447 */,
-/* 448 */,
+/* 448 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var escapeStringRegexp = __webpack_require__(624);
+
+module.exports = function (str, sub) {
+	if (typeof str !== 'string' || typeof sub !== 'string') {
+		throw new TypeError();
+	}
+
+	sub = escapeStringRegexp(sub);
+	return str.replace(new RegExp('^' + sub + '|' + sub + '$', 'g'), '');
+};
+
+
+/***/ }),
 /* 449 */,
 /* 450 */,
 /* 451 */
@@ -47450,7 +47552,23 @@ function clean(key)
 
 
 /***/ }),
-/* 567 */,
+/* 567 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var escapeStringRegexp = __webpack_require__(66);
+
+module.exports = function (str, target) {
+	if (typeof str !== 'string' || typeof target !== 'string') {
+		throw new TypeError('Expected a string');
+	}
+
+	return str.replace(new RegExp('(?:' + escapeStringRegexp(target) + '){2,}', 'g'), target);
+};
+
+
+/***/ }),
 /* 568 */,
 /* 569 */,
 /* 570 */,
@@ -47752,11 +47870,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /* 587 */,
 /* 588 */,
 /* 589 */
-/***/ (function(__unusedmodule, __webpack_exports__, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return prettyBytes; });
+
+
 const BYTE_UNITS = [
 	'B',
 	'kB',
@@ -47766,7 +47884,7 @@ const BYTE_UNITS = [
 	'PB',
 	'EB',
 	'ZB',
-	'YB',
+	'YB'
 ];
 
 const BIBYTE_UNITS = [
@@ -47778,7 +47896,7 @@ const BIBYTE_UNITS = [
 	'PiB',
 	'EiB',
 	'ZiB',
-	'YiB',
+	'YiB'
 ];
 
 const BIT_UNITS = [
@@ -47790,7 +47908,7 @@ const BIT_UNITS = [
 	'Pbit',
 	'Ebit',
 	'Zbit',
-	'Ybit',
+	'Ybit'
 ];
 
 const BIBIT_UNITS = [
@@ -47802,7 +47920,7 @@ const BIBIT_UNITS = [
 	'Pibit',
 	'Eibit',
 	'Zibit',
-	'Yibit',
+	'Yibit'
 ];
 
 /*
@@ -47822,20 +47940,16 @@ const toLocaleString = (number, locale, options) => {
 	return result;
 };
 
-function prettyBytes(number, options) {
+module.exports = (number, options) => {
 	if (!Number.isFinite(number)) {
 		throw new TypeError(`Expected a finite number, got ${typeof number}: ${number}`);
 	}
 
-	options = {
-		bits: false,
-		binary: false,
-		...options,
-	};
+	options = Object.assign({bits: false, binary: false}, options);
 
-	const UNITS = options.bits
-		? (options.binary ? BIBIT_UNITS : BIT_UNITS)
-		: (options.binary ? BIBYTE_UNITS : BYTE_UNITS);
+	const UNITS = options.bits ?
+		(options.binary ? BIBIT_UNITS : BIT_UNITS) :
+		(options.binary ? BIBYTE_UNITS : BYTE_UNITS);
 
 	if (options.signed && number === 0) {
 		return ` 0 ${UNITS[0]}`;
@@ -47855,7 +47969,7 @@ function prettyBytes(number, options) {
 	}
 
 	if (options.maximumFractionDigits !== undefined) {
-		localeOptions = {maximumFractionDigits: options.maximumFractionDigits, ...localeOptions};
+		localeOptions = Object.assign({maximumFractionDigits: options.maximumFractionDigits}, localeOptions);
 	}
 
 	if (number < 1) {
@@ -47864,7 +47978,8 @@ function prettyBytes(number, options) {
 	}
 
 	const exponent = Math.min(Math.floor(options.binary ? Math.log(number) / Math.log(1024) : Math.log10(number) / 3), UNITS.length - 1);
-	number /= (options.binary ? 1024 : 1000) ** exponent;
+	// eslint-disable-next-line unicorn/prefer-exponentiation-operator
+	number /= Math.pow(options.binary ? 1024 : 1000, exponent);
 
 	if (!localeOptions) {
 		number = number.toPrecision(3);
@@ -47875,7 +47990,7 @@ function prettyBytes(number, options) {
 	const unit = UNITS[exponent];
 
 	return prefix + numberString + ' ' + unit;
-}
+};
 
 
 /***/ }),
@@ -48664,7 +48779,24 @@ module.exports = require("path");
 
 /***/ }),
 /* 623 */,
-/* 624 */,
+/* 624 */
+/***/ (function(module) {
+
+"use strict";
+
+
+var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
+
+module.exports = function (str) {
+	if (typeof str !== 'string') {
+		throw new TypeError('Expected a string');
+	}
+
+	return str.replace(matchOperatorsRe, '\\$&');
+};
+
+
+/***/ }),
 /* 625 */,
 /* 626 */,
 /* 627 */,
@@ -52257,9 +52389,10 @@ process.on("uncaughtException", e => utils.logWarning(e.message));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (!utils.isCacheFeatureAvailable()) {
-                return;
-            }
+            // Using local cache on a runner is always an available option
+            // if (!utils.isCacheFeatureAvailable()) {
+            //     return;
+            // }
             if (!utils.isValidEvent()) {
                 utils.logWarning(`Event Validation Error: The event type ${process.env[constants_1.Events.Key]} is not supported because it's not tied to a branch or tag ref.`);
                 return;
@@ -53224,7 +53357,8 @@ exports.saveCache = exports.restoreCache = exports.ValidationError = exports.Res
 const core = __importStar(__webpack_require__(470));
 const child_process_1 = __webpack_require__(129);
 const fast_glob_1 = __importDefault(__webpack_require__(406));
-const filenamify_1 = __importDefault(__webpack_require__(764));
+const filenamify_1 = __importDefault(__webpack_require__(83));
+const fs_1 = __importDefault(__webpack_require__(747));
 const path_1 = __webpack_require__(622);
 const pretty_bytes_1 = __importDefault(__webpack_require__(589));
 const util_1 = __webpack_require__(669);
@@ -53391,11 +53525,9 @@ function saveCache(paths, key) {
         const baseDir = (0, path_1.dirname)(path);
         const folderName = (0, path_1.basename)(path);
         // Ensure cache dir exists
-        const mkdirPromise = execAsync(`mkdir -p ${cacheDir}`);
-        yield streamOutputUntilResolved(mkdirPromise);
+        yield fs_1.default.promises.mkdir(cacheDir, { recursive: true });
         const cmd = `tar -I pigz -cf ${cachePath} -C ${baseDir} ${folderName}`;
         core.info(`Save cache: ${cacheName}`);
-        // console.log({ cacheDir, cacheName, cachePath, cmd });
         const createCacheDirPromise = execAsync(cmd);
         try {
             yield streamOutputUntilResolved(createCacheDirPromise);
@@ -54574,146 +54706,38 @@ module.exports = function globParent(str, opts) {
 
 /***/ }),
 /* 764 */
-/***/ (function(__unusedmodule, __webpack_exports__, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
 
-// CONCATENATED MODULE: ./node_modules/trim-repeated/node_modules/escape-string-regexp/index.js
-function escapeStringRegexp(string) {
-	if (typeof string !== 'string') {
-		throw new TypeError('Expected a string');
-	}
-
-	// Escape characters with special meaning either inside or outside character sets.
-	// Use a simple backslash escape when it’s always valid, and a `\xnn` escape when the simpler form would be disallowed by Unicode patterns’ stricter grammar.
-	return string
-		.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
-		.replace(/-/g, '\\x2d');
-}
-
-// CONCATENATED MODULE: ./node_modules/trim-repeated/index.js
-
-
-function trimRepeated(string, target) {
-	if (typeof string !== 'string' || typeof target !== 'string') {
-		throw new TypeError('Expected a string');
-	}
-
-	const regex = new RegExp(`(?:${escapeStringRegexp(target)}){2,}`, 'g');
-
-	return string.replace(regex, target);
-}
-
-// CONCATENATED MODULE: ./node_modules/filename-reserved-regex/index.js
-/* eslint-disable no-control-regex */
-
-function filenameReservedRegex() {
-	return /[<>:"/\\|?*\u0000-\u001F]/g;
-}
-
-function windowsReservedNameRegex() {
-	return /^(con|prn|aux|nul|com\d|lpt\d)$/i;
-}
-
-// CONCATENATED MODULE: ./node_modules/strip-outer/index.js
-function stripOuter(string, substring) {
-	if (typeof string !== 'string' || typeof substring !== 'string') {
-		throw new TypeError('Expected a string');
-	}
-
-	if (string.startsWith(substring)) {
-		string = string.slice(substring.length);
-	}
-
-	if (string.endsWith(substring)) {
-		string = string.slice(0, -substring.length);
-	}
-
-	return string;
-}
-
-// CONCATENATED MODULE: ./node_modules/filenamify/filenamify.js
-
-
-
-
-// Doesn't make sense to have longer filenames
-const MAX_FILENAME_LENGTH = 100;
-
-const reControlChars = /[\u0000-\u001F\u0080-\u009F]/g; // eslint-disable-line no-control-regex
-const reRelativePath = /^\.+(\\|\/)|^\.+$/;
-const reTrailingPeriods = /\.+$/;
-
-function filenamify(string, options = {}) {
-	if (typeof string !== 'string') {
-		throw new TypeError('Expected a string');
-	}
-
-	const replacement = options.replacement === undefined ? '!' : options.replacement;
-
-	if (filenameReservedRegex().test(replacement) && reControlChars.test(replacement)) {
-		throw new Error('Replacement string cannot contain reserved filename characters');
-	}
-
-	string = string.normalize('NFD');
-	string = string.replace(reRelativePath, replacement);
-	string = string.replace(filenameReservedRegex(), replacement);
-	string = string.replace(reControlChars, replacement);
-	string = string.replace(reTrailingPeriods, '');
-
-	if (replacement.length > 0) {
-		const startedWithDot = string[0] === '.';
-
-		string = trimRepeated(string, replacement);
-		string = string.length > 1 ? stripOuter(string, replacement) : string;
-
-		// We removed the whole filename
-		if (!startedWithDot && string[0] === '.') {
-			string = replacement + string;
-		}
-
-		// We removed the whole extension
-		if (string[string.length - 1] === '.') {
-			string += replacement;
-		}
-	}
-
-	string = windowsReservedNameRegex().test(string) ? string + replacement : string;
-	const allowedLength = typeof options.maxLength === 'number' ? options.maxLength : MAX_FILENAME_LENGTH;
-	if (string.length > allowedLength) {
-		const extensionIndex = string.lastIndexOf('.');
-		if (extensionIndex === -1) {
-			string = string.slice(0, allowedLength);
-		} else {
-			const filename = string.slice(0, extensionIndex);
-			const extension = string.slice(extensionIndex);
-			string = filename.slice(0, Math.max(1, allowedLength - extension.length)) + extension;
-		}
-	}
-
-	return string;
-}
-
-// EXTERNAL MODULE: (webpack)/ncc/@@notfound.js?node:path
-var _notfoundnode_path = __webpack_require__(117);
-var _notfoundnode_path_default = /*#__PURE__*/__webpack_require__.n(_notfoundnode_path);
-
-// CONCATENATED MODULE: ./node_modules/filenamify/filenamify-path.js
-
-
-
-function filenamifyPath(filePath, options) {
-	filePath = _notfoundnode_path_default().resolve(filePath);
-	return _notfoundnode_path_default().join(_notfoundnode_path_default().dirname(filePath), filenamify(_notfoundnode_path_default().basename(filePath), options));
-}
-
-// CONCATENATED MODULE: ./node_modules/filenamify/index.js
-/* concated harmony reexport */ __webpack_require__.d(__webpack_exports__, "default", function() { return filenamify; });
-/* concated harmony reexport */ __webpack_require__.d(__webpack_exports__, "filenamifyPath", function() { return filenamifyPath; });
-
-
-
+/*
+ * Copyright The OpenTelemetry Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(__webpack_require__(950), exports);
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 /* 765 */,
@@ -58125,41 +58149,7 @@ module.exports = require("url");
 /* 839 */,
 /* 840 */,
 /* 841 */,
-/* 842 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-/*
- * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(__webpack_require__(950), exports);
-//# sourceMappingURL=index.js.map
-
-/***/ }),
+/* 842 */,
 /* 843 */,
 /* 844 */,
 /* 845 */
@@ -60189,7 +60179,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /***/ }),
 /* 907 */,
 /* 908 */,
-/* 909 */,
+/* 909 */
+/***/ (function(module) {
+
+"use strict";
+
+/* eslint-disable no-control-regex */
+// TODO: remove parens when Node.js 6 is targeted. Node.js 4 barfs at it.
+module.exports = () => (/[<>:"\/\\|?*\x00-\x1F]/g);
+module.exports.windowsNames = () => (/^(con|prn|aux|nul|com[0-9]|lpt[0-9])$/i);
+
+
+/***/ }),
 /* 910 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -60221,7 +60222,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(__webpack_require__(842), exports);
+__exportStar(__webpack_require__(764), exports);
 //# sourceMappingURL=index.js.map
 
 /***/ }),
@@ -68743,62 +68744,4 @@ exports.userAgentPolicy = userAgentPolicy;
 
 
 /***/ })
-/******/ ],
-/******/ function(__webpack_require__) { // webpackRuntimeModules
-/******/ 	"use strict";
-/******/ 
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	!function() {
-/******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = function(exports) {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getter */
-/******/ 	!function() {
-/******/ 		// define getter function for harmony exports
-/******/ 		var hasOwnProperty = Object.prototype.hasOwnProperty;
-/******/ 		__webpack_require__.d = function(exports, name, getter) {
-/******/ 			if(!hasOwnProperty.call(exports, name)) {
-/******/ 				Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 			}
-/******/ 		};
-/******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/create fake namespace object */
-/******/ 	!function() {
-/******/ 		// create a fake namespace object
-/******/ 		// mode & 1: value is a module id, require it
-/******/ 		// mode & 2: merge all properties of value into the ns
-/******/ 		// mode & 4: return value when already ns object
-/******/ 		// mode & 8|1: behave like require
-/******/ 		__webpack_require__.t = function(value, mode) {
-/******/ 			if(mode & 1) value = this(value);
-/******/ 			if(mode & 8) return value;
-/******/ 			if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 			var ns = Object.create(null);
-/******/ 			__webpack_require__.r(ns);
-/******/ 			Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 			if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 			return ns;
-/******/ 		};
-/******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	!function() {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = function(module) {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				function getDefault() { return module['default']; } :
-/******/ 				function getModuleExports() { return module; };
-/******/ 			__webpack_require__.d(getter, 'a', getter);
-/******/ 			return getter;
-/******/ 		};
-/******/ 	}();
-/******/ 	
-/******/ }
-);
+/******/ ]);

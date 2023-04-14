@@ -7,10 +7,8 @@ module.exports = {
     testMatch: ["**/*.test.ts"],
     testRunner: "jest-circus/runner",
     transform: {
-        "^.+\\.ts$": "ts-jest",
-        "^.+\\.js$": "ts-jest"
+        "^.+\\.ts$": "ts-jest"
     },
-    transformIgnorePatterns: ["<rootDir>/node_modules/(?!filenamify)"],
     verbose: true
 };
 
