@@ -53314,6 +53314,8 @@ function saveCache(paths, key) {
         catch (err) {
             core.warning(`Error running tar: {err}`);
             const skipFailure = core.getInput("skip-failure") || false;
+            const cleanBadFile = execAsync(`rm -rf ${cachePath}`);
+            yield streamOutputUntilResolved(cleanBadFile);
             if (!skipFailure) {
                 throw err;
             }

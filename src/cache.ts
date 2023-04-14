@@ -234,6 +234,8 @@ export async function saveCache(paths: string[], key: string): Promise<number> {
     } catch (err) {
         core.warning(`Error running tar: {err}`);
         const skipFailure = core.getInput("skip-failure") || false;
+        const cleanBadFile = execAsync(`rm -rf ${cachePath}`);
+        await streamOutputUntilResolved(cleanBadFile);
         if (!skipFailure) {
             throw err;
         }
