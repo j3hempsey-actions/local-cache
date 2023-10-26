@@ -190,10 +190,12 @@ export async function restoreCache(
         await streamOutputUntilResolved(createCacheDirPromise);
     } catch (err) {
         const skipFailure = core.getInput("skip-failure") || false;
-        core.warning(`Error running tar: {err}`);
+        core.warning(`Error running tar: ${err}`);
         if (!skipFailure) {
             throw err;
         }
+        const cleanBadFile = execAsync(`rm -rf ${cachePath}`);
+        await streamOutputUntilResolved(cleanBadFile);
     }
 
     return key;
@@ -231,7 +233,7 @@ export async function saveCache(paths: string[], key: string): Promise<number> {
     try {
         await streamOutputUntilResolved(createCacheDirPromise);
     } catch (err) {
-        core.warning(`Error running tar: {err}`);
+        core.warning(`Error running tar: ${err}`);
         const skipFailure = core.getInput("skip-failure") || false;
         const cleanBadFile = execAsync(`rm -rf ${cachePath}`);
         await streamOutputUntilResolved(cleanBadFile);
